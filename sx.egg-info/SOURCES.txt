@@ -1,0 +1,11 @@
+README.md
+setup.py
+sx/__init__.py
+sx/__main__.py
+sx/utils.py
+sx.egg-info/PKG-INFO
+sx.egg-info/SOURCES.txt
+sx.egg-info/dependency_links.txt
+sx.egg-info/entry_points.txt
+sx.egg-info/not-zip-safe
+sx.egg-info/top_level.txt
