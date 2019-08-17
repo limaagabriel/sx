@@ -1,3 +1,0 @@
-[console_scripts]
-sx = sx.__main__:main
-

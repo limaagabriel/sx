@@ -20,6 +20,11 @@ setuptools.setup(
     download_url=DOWNLOAD,
     classifiers=[],
     packages=["sx"],
+    install_requires=[
+        'grpcio>=1.22.0',
+        'grpcio-tools>=1.22.0',
+        'toml>=0.10.0'
+    ],
     entry_points={"console_scripts": ["sx=sx.__main__:main"]},
     python_requires=">=3.5",
     test_suite="tests",
