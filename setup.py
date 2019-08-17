@@ -2,6 +2,7 @@
 import sx
 import setuptools
 
+
 VERSION = sx.__version__
 LONG_DESC = open('README.md').read()
 DOWNLOAD = "https://github.com/itsmealves/sx/releases/download/{0}/sx-{0}.tar.gz".format(VERSION)
@@ -19,7 +20,13 @@ setuptools.setup(
     url="https://github.com/itsmealves/sx",
     download_url=DOWNLOAD,
     classifiers=[],
-    packages=setuptools.find_packages(),
+    packages=[
+        'sx',
+        'sx.stubs',
+        'sx.actions',
+        'sx.actions.boot',
+        'sx.actions.create'
+    ],
     install_requires=[
         'grpcio>=1.22.0',
         'grpcio-tools>=1.22.0',
