@@ -19,7 +19,7 @@ setuptools.setup(
     url="https://github.com/itsmealves/sx",
     download_url=DOWNLOAD,
     classifiers=[],
-    packages=["sx"],
+    packages=setuptools.find_packages(),
     install_requires=[
         'grpcio>=1.22.0',
         'grpcio-tools>=1.22.0',
