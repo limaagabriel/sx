@@ -4,7 +4,7 @@ import setuptools
 
 VERSION = sx.__version__
 LONG_DESC = open('README.md').read()
-DOWNLOAD = "https://github.com/itsmealves/sx/archive/sx-%s.tar.gz" % VERSION
+DOWNLOAD = "https://github.com/itsmealves/sx/releases/download/{0}/sx-{0}.tar.gz".format(VERSION)
 
 setuptools.setup(
     name="sx",
