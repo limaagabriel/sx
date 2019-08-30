@@ -20,6 +20,8 @@ class Settings(object):
 			content = self.__settings[name]
 
 			self.__current_key = self.__current_key + 1
+			if type(content) is not dict:
+				return name, content
 			return name, Settings(content)
 
 

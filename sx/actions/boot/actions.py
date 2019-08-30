@@ -22,8 +22,8 @@ def build(settings, args):
 				environment.add_port(dependency, settings)
 				build_action(dependency, package_data.type, package_name)
 
-			if package_data.environment is not None:
-				for key, value in package_data.environment:
+			if package_data.variables is not None:
+				for key, value in package_data.variables:
 					environment.add(key, value)
 
 			if package_data.available is None or package_data.available:
