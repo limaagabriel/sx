@@ -1,5 +1,10 @@
+import sys
 import time
+import libtmux
+from coolname import generate_slug
+
 from sx.utils import run
+from sx.utils import sort
 from sx.utils import install
 from sx.utils import copy_protocols
 from sx.utils import execute_command
@@ -38,17 +43,41 @@ def start(settings, args):
 
 	if args.packages is not None:
 		def filter_fn(x): return x[0] in args.packages
-		selected_packages = filter(filter_fn, selected_packages)
+		selected_packages = list(filter(filter_fn, selected_packages))
 
-	for package_name, package_settings in selected_packages:
-		processes.append(run(package_name, package_settings))
+	if len(selected_packages) == 0:
+		print('You should select at least one valid package')
+		sys.exit(0)
+
+	server = libtmux.Server()
+	session_name = generate_slug(2)
+	session = server.new_session(session_name)
+
+	for package_name, package_settings in sort(selected_packages):
+		run(session, package_name, package_settings)
+	session.list_windows()[0].kill_window()
 
 	try:
+		print('Session name: {}'.format(session_name))
 		print('Press Ctrl+C to stop')
 		
 		while True:
 			time.sleep(86400)
 	except KeyboardInterrupt:
 		print('Requesting services to stop')
-		for process in processes:
-			process.release()
+
+		for window in session.list_windows():
+			while True:
+				try:
+					cmd = window.attached_pane.cmd('kill -SIGINT $PID')
+					cmd.process.wait(timeout=1)
+					break
+				except Exception:
+					pass
+
+		try:
+			for window in session.list_windows():
+				window.kill_window()
+		except libtmux.exc.LibTmuxException:
+			print('Exited successfully!')
+

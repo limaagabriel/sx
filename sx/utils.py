@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 import subprocess
 from subprocess import PIPE
@@ -56,7 +57,20 @@ def ensure_log_dir_exists():
 	if not os.path.exists(get_log_dir()):
 		os.mkdir(get_log_dir())
 
-def run(name, settings):
+def run(session, name, settings):
+	command = settings.start 
+	window = session.new_window(name)
+	working_dir = get_package_root(name)
+	activate_path = os.path.join(sys.prefix, 'bin', 'activate')
+	
+	if os.path.exists(activate_path):
+		window.attached_pane.send_keys('source {}'.format(activate_path))
+
+	window.attached_pane.send_keys('cd {}'.format(working_dir))
+	window.attached_pane.send_keys('{} &'.format(command))
+	window.attached_pane.send_keys('PID=$!')
+
+def run_process(name, settings):
 	ensure_log_dir_exists()
 	command = settings.start.split(' ')
 
@@ -78,3 +92,38 @@ def execute_command(package_name, command_name, command):
 	message = [command_name, package_name, command]
 	print('Executing {} for package "{}": {}'.format(*message))
 	subprocess.run(command.split(' '), stdout=PIPE, stderr=PIPE, cwd=working_dir)
+
+
+def sort(packages):
+	# Source: https://stackoverflow.com/a/11564323
+	def topological_sort(source):
+		"""perform topo sort on elements.
+
+		:arg source: list of ``(name, [list of dependancies])`` pairs
+		:returns: list of names, with dependancies listed first
+		"""
+		pending = [(name, set(deps)) for name, deps in source] # copy deps so we can modify set in-place       
+		emitted = []        
+		while pending:
+			next_pending = []
+			next_emitted = []
+			for entry in pending:
+				name, deps = entry
+				deps.difference_update(emitted) # remove deps we emitted last pass
+				if deps: # still has deps? recheck during next pass
+					next_pending.append(entry) 
+				else: # no more deps? time to emit
+					yield name 
+					emitted.append(name) # <-- not required, but helps preserve original ordering
+					next_emitted.append(name) # remember what we emitted for difference_update() in next pass
+			if not next_emitted: # all entries have unmet deps, one of two things is wrong...
+				message = 'cyclic or missing dependency detected: {}'.format(next_pending)
+				raise ValueError(message)
+			pending = next_pending
+			emitted = next_emitted
+
+	names = list(map(lambda x: x[0], packages))
+	input_list = list(map(lambda x: (x[0], x[1].dependencies), packages))
+	correct_order = list(topological_sort(input_list))
+	indexes = list(map(lambda x: names.index(x), correct_order))
+	return list(map(lambda x: packages[x], indexes))

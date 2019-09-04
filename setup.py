@@ -30,7 +30,9 @@ setuptools.setup(
     install_requires=[
         'grpcio>=1.22.0',
         'grpcio-tools>=1.22.0',
-        'toml>=0.10.0'
+        'toml>=0.10.0',
+        'libtmux>=0.8.2',
+        'coolname>=1.1.0'
     ],
     entry_points={"console_scripts": ["sx=sx.__main__:main"]},
     python_requires=">=3.5",

@@ -50,3 +50,6 @@ class Settings(object):
 
 	def __str__(self):
 		return json.dumps(self.__settings, indent=4)
+
+	def __len__(self):
+		return len(self.__settings)
