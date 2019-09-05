@@ -1,8 +1,10 @@
 import os
+import re
 import sys
 import shutil
 import subprocess
 from subprocess import PIPE
+from functools import reduce
 from sx.stubs.process_log import ProcessLog
 
 
@@ -57,10 +59,21 @@ def ensure_log_dir_exists():
 	if not os.path.exists(get_log_dir()):
 		os.mkdir(get_log_dir())
 
+def compile_command(command, data):
+	result = '{}'.format(command)
+	occurrences = re.finditer('\#\{\w+(\.\w+)*\}', command)
+	tokens = set(map(lambda x: x.group(0), occurrences))
+
+	for token in tokens:
+		def reducer(a, b): return getattr(a, b)
+		value = reduce(reducer, token[2:-1].split('.'), data)
+		result = command.replace(token, str(value))
+	return result
+
 def run(session, name, settings):
-	command = settings.start 
 	window = session.new_window(name)
 	working_dir = get_package_root(name)
+	command = compile_command(settings.start, settings) 
 	activate_path = os.path.join(sys.prefix, 'bin', 'activate')
 	
 	if os.path.exists(activate_path):
@@ -87,11 +100,17 @@ def run_process(name, settings):
 
 	return ProcessLog(name, process, log_body)
 
-def execute_command(package_name, command_name, command):
-	working_dir = get_package_root(package_name)
-	message = [command_name, package_name, command]
-	print('Executing {} for package "{}": {}'.format(*message))
-	subprocess.run(command.split(' '), stdout=PIPE, stderr=PIPE, cwd=working_dir)
+def execute_command(package_name, command_name, data):
+	commands = getattr(data, command_name)
+	if type(commands) == str:
+		commands = [ commands ]
+
+	for idx, command in enumerate(commands):
+		command = compile_command(command, data)
+		working_dir = get_package_root(package_name)
+		message = [command_name, idx, package_name, command]
+		print('Executing {} ({}) for package "{}": {}'.format(*message))
+		subprocess.run(command.split(' '), stdout=PIPE, stderr=PIPE, cwd=working_dir)
 
 
 def sort(packages):

@@ -14,7 +14,17 @@ from sx.stubs.environment import Environment
 
 def build(settings, args):
 	buildable_types = ['python']
-	for package_name, package_data in settings.package:
+	selected_packages = list(settings.package)
+
+	if args.packages is not None:
+		def filter_fn(x): return x[0] in args.packages
+		selected_packages = list(filter(filter_fn, selected_packages))
+
+	if len(selected_packages) == 0:
+		print('You should select at least one valid package')
+		sys.exit(0)
+
+	for package_name, package_data in selected_packages:
 		build_action = copy_protocols
 		clean_build_location(package_name)
 		if package_data.type in buildable_types:
@@ -25,7 +35,9 @@ def build(settings, args):
 			
 			for dependency in package_data.dependencies:
 				environment.add_port(dependency, settings)
-				build_action(dependency, package_data.type, package_name)
+				dependency_data = getattr(settings.package, dependency)
+				if dependency_data.available is None or dependency_data.available:
+					build_action(dependency, package_data.type, package_name)
 
 			if package_data.variables is not None:
 				for key, value in package_data.variables:
@@ -34,7 +46,7 @@ def build(settings, args):
 			if package_data.available is None or package_data.available:
 				build_action(package_name, package_data.type, package_name)
 		if package_data.postBuild is not None:
-			execute_command(package_name, 'PostBuild', package_data.postBuild)
+			execute_command(package_name, 'postBuild', package_data)
 
 
 def start(settings, args):

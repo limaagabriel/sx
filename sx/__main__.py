@@ -13,6 +13,8 @@ create_parser = action_parsers.add_parser('create', help='Create a new sx-based 
 
 boot_action_parsers = boot_parser.add_subparsers(dest='boot_action')
 build_command = boot_action_parsers.add_parser('build', help='Builds application packages')
+build_command.add_argument('-p', '--packages', nargs='+', default=None,
+							help='Selects which packages should boot build (default: all packages)')
 
 start_command = boot_action_parsers.add_parser('start', help='Run packages')
 start_command.add_argument('-p', '--packages', nargs='+', default=None,
