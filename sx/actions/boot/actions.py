@@ -1,3 +1,4 @@
+import re
 import sys
 import time
 import libtmux
@@ -32,6 +33,35 @@ def build(settings, args):
 
 		with Environment(package_name) as environment:
 			environment.add_port(package_name, settings)
+
+			if settings.profile is not None:
+				for profile_type, global_data in settings.profile:
+					def filter_fn(choice):
+						pattern = re.compile('^{}:[\w\-\d]+$'.format(profile_type, 'g'))
+						return re.search(pattern, choice)
+
+					chosen_profile = global_data.default
+					match_choices = list(filter(filter_fn, args.profiles))
+					if len(match_choices) > 0:
+						key = '{}:'.format(profile_type)
+						chosen_profile = match_choices[-1].replace(key, '')
+
+					if chosen_profile not in global_data.options:
+						message = 'Profile {}:{} is not an option.'
+						print(message.format(profile_type, chosen_profile))
+						sys.exit(0)
+
+					if 'variables' in global_data and chosen_profile in global_data.variables:
+						for key, value in getattr(global_data.variables, chosen_profile):
+							environment.add(key, value)
+
+					if 'profile' in package_data \
+						and profile_type in package_data.profile \
+						and chosen_profile in getattr(package_data.profile, profile_type):
+
+						values = getattr(package_data.profile, profile_type)
+						for key, value in getattr(values, chosen_profile):
+							environment.add(key, value)
 			
 			for dependency in package_data.dependencies:
 				environment.add_port(dependency, settings)

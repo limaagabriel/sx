@@ -15,6 +15,9 @@ boot_action_parsers = boot_parser.add_subparsers(dest='boot_action')
 build_command = boot_action_parsers.add_parser('build', help='Builds application packages')
 build_command.add_argument('-p', '--packages', nargs='+', default=None,
 							help='Selects which packages should boot build (default: all packages)')
+build_command.add_argument('-f', '--profiles', nargs='+', default=[],
+							help='Selects which profiles to  use (default: use default profiles)')
+
 
 start_command = boot_action_parsers.add_parser('start', help='Run packages')
 start_command.add_argument('-p', '--packages', nargs='+', default=None,
