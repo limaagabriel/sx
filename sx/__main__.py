@@ -22,6 +22,9 @@ build_command.add_argument('-f', '--profiles', nargs='+', default=[],
 start_command = boot_action_parsers.add_parser('start', help='Run packages')
 start_command.add_argument('-p', '--packages', nargs='+', default=None,
 							help='Selects which packages should boot run (default: all packages)')
+start_command.add_argument('-d', '--develop', default=False, action='store_true',
+							help='Starts packages for development with a suitable command (when provided).')
+
 
 create_parser.add_argument('name', help='Determine application name')
 

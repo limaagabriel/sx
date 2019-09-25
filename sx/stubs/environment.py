@@ -7,12 +7,17 @@ class Environment(object):
 		self.__location = location
 		self.__data = {}
 
-	def add(self, key, value):
+	def add(self, key, value, prefix=None):
+		if prefix is not None:
+			key = '{}{}'.format(prefix, key)
 		self.__data[key] = value
 
-	def add_port(self, name, settings):
+	def add_port(self, name, settings, prefix=None):
 		port_key = '{}_PORT'.format(name.upper())
 		port_value = getattr(settings.package, name).port
+
+		if prefix is not None:
+			port_key = '{}{}'.format(prefix, port_key)
 
 		self.add(port_key, port_value)
 

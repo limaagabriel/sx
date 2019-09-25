@@ -1,10 +1,14 @@
 import os
 import re
 import sys
+import time
 import shutil
+import libtmux
 import subprocess
+
 from subprocess import PIPE
 from functools import reduce
+from coolname import generate_slug
 from sx.stubs.process_log import ProcessLog
 
 
@@ -70,18 +74,27 @@ def compile_command(command, data):
 		result = command.replace(token, str(value))
 	return result
 
-def run(session, name, settings):
+def run(session, name, settings, for_development):
+	default_command = settings.start
+	if for_development and settings.develop is not None:
+		default_command = settings.develop
+
 	window = session.new_window(name)
 	working_dir = get_package_root(name)
-	command = compile_command(settings.start, settings) 
+	command = compile_command(default_command, settings) 
 	activate_path = os.path.join(sys.prefix, 'bin', 'activate')
+
+	commands = [
+		'cd {}'.format(working_dir),
+		'{} &'.format(command),
+		'PID=$!'
+	]
 	
 	if os.path.exists(activate_path):
-		window.attached_pane.send_keys('source {}'.format(activate_path))
+		commands.insert(0, 'source {}'.format(activate_path))
 
-	window.attached_pane.send_keys('cd {}'.format(working_dir))
-	window.attached_pane.send_keys('{} &'.format(command))
-	window.attached_pane.send_keys('PID=$!')
+	for cmd in commands:
+		window.attached_pane.send_keys(cmd)
 
 def run_process(name, settings):
 	ensure_log_dir_exists()
@@ -146,3 +159,40 @@ def sort(packages):
 	correct_order = list(topological_sort(input_list))
 	indexes = list(map(lambda x: names.index(x), correct_order))
 	return list(map(lambda x: packages[x], indexes))
+
+
+def create_session(packages, for_development):
+	server = libtmux.Server()
+	session_name = generate_slug(2)
+	session = server.new_session(session_name)
+
+	for package_name, package_settings in sort(packages):
+		run(session, package_name, package_settings, for_development)
+	session.list_windows()[0].kill_window()
+	return session, session_name
+
+def close_session(session):
+	for window in session.list_windows():
+		for _ in range(2):
+			window.attached_pane.send_keys('kill -SIGINT $PID')
+
+	try:
+		for window in session.list_windows():
+			window.kill_window()
+			pass
+	except libtmux.exc.LibTmuxException:
+		return True
+	return False
+
+def select_packages(settings, choices):
+	selected_packages = list(settings.package)
+
+	if choices is not None:
+		def filter_fn(x): return x[0] in choices
+		selected_packages = list(filter(filter_fn, selected_packages))
+
+	if len(selected_packages) == 0:
+		print('You should select at least one valid package')
+		sys.exit(0)
+
+	return selected_packages
