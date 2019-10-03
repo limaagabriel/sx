@@ -45,7 +45,7 @@ def build(settings, args):
 
 					if 'variables' in global_data and chosen_profile in global_data.variables:
 						for key, value in getattr(global_data.variables, chosen_profile):
-							environment.add(key, value)
+							environment.add(key, value, package_data.variablesPrefix)
 
 					if 'profile' in package_data \
 						and profile_type in package_data.profile \
@@ -53,7 +53,7 @@ def build(settings, args):
 
 						values = getattr(package_data.profile, profile_type)
 						for key, value in getattr(values, chosen_profile):
-							environment.add(key, value)
+							environment.add(key, value, package_data.variablesPrefix)
 			
 			for dependency in package_data.dependencies:
 				environment.add_port(dependency, settings, package_data.variablesPrefix)
