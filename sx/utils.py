@@ -80,9 +80,9 @@ def run(session, name, settings, for_development):
 		default_command = settings.develop
 
 	window = session.new_window(name)
-	working_dir = get_package_root(name)
 	command = compile_command(default_command, settings) 
 	activate_path = os.path.join(sys.prefix, 'bin', 'activate')
+	working_dir = os.path.join(os.getcwd(), get_package_root(name))
 
 	commands = [
 		'cd {}'.format(working_dir),
