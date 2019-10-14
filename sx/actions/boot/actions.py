@@ -26,6 +26,11 @@ def build(settings, args):
 		with Environment(package_name) as environment:
 			environment.add_port(package_name, settings, package_data.variablesPrefix)
 
+			if settings.application is not None:
+				for key, value in settings.application:
+					app_key = 'APPLICATION_{}'.format(key.upper())
+					environment.add(app_key, value)
+
 			if settings.profile is not None:
 				for profile_type, global_data in settings.profile:
 					def filter_fn(choice):
