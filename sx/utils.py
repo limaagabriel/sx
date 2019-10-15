@@ -6,6 +6,7 @@ import shutil
 import libtmux
 import subprocess
 
+from pathlib import Path
 from subprocess import PIPE
 from functools import reduce
 from coolname import generate_slug
@@ -38,6 +39,12 @@ def install(name, build_type, target):
 
 	command = command_body.format(build_type, target_path, protocol_path)
 	subprocess.run(command.strip().split(' '))
+
+	if build_type == 'python':
+		init_root = get_package_protocols_path(target)
+		init_file_path = os.path.join(init_root, '__init__.py')
+		if not os.path.exists(init_file_path):
+			Path(init_file_path).touch()
 
 
 def copy_protocols(name, build_type, target):

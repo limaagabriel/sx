@@ -25,14 +25,16 @@ setuptools.setup(
         'sx.stubs',
         'sx.actions',
         'sx.actions.boot',
-        'sx.actions.create'
+        'sx.actions.create',
+        'sx.helpers'
     ],
     install_requires=[
         'grpcio>=1.22.0',
         'grpcio-tools>=1.22.0',
         'toml>=0.10.0',
         'libtmux>=0.8.2',
-        'coolname>=1.1.0'
+        'coolname>=1.1.0',
+        'requests>=2.22.0'
     ],
     entry_points={"console_scripts": ["sx=sx.__main__:main"]},
     python_requires=">=3.5",
