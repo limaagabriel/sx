@@ -29,7 +29,7 @@ def build(settings, args):
 			if settings.application is not None:
 				for key, value in settings.application:
 					app_key = 'APPLICATION_{}'.format(key.upper())
-					environment.add(app_key, value)
+					environment.add(app_key, value, package_data.variablesPrefix)
 
 			if settings.profile is not None:
 				for profile_type, global_data in settings.profile:
