@@ -72,7 +72,7 @@ def ensure_log_dir_exists():
 
 def compile_command(command, data):
     result = '{}'.format(command)
-    occurrences = re.finditer('\#\{\w+(\.\w+)*\}', command)
+    occurrences = re.finditer('\$\{\w+(\.\w+)*\}', command)
     tokens = set(map(lambda x: x.group(0), occurrences))
 
     for token in tokens:
