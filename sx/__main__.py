@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser()
 
 action_parsers = parser.add_subparsers(dest='action')
 boot_parser = action_parsers.add_parser('boot', help='Manage sx-based applications')
-boot_parser.add_argument('-s', '--settings', default='application.toml')
+boot_parser.add_argument('-s', '--settings', default='application.yml')
 
 create_parser = action_parsers.add_parser('create', help='Create a new sx-based application')
 

@@ -31,7 +31,7 @@ setuptools.setup(
     install_requires=[
         'grpcio>=1.22.0',
         'grpcio-tools>=1.22.0',
-        'toml>=0.10.0',
+        'PyYAML>=5.1.2',
         'libtmux>=0.8.2',
         'coolname>=1.1.0',
         'requests>=2.22.0'

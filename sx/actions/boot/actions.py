@@ -24,15 +24,29 @@ def build(settings, args):
 			build_action = install
 
 		with Environment(package_name) as environment:
-			environment.add_port(package_name, settings, package_data.variablesPrefix)
+			environment.add_port(package_name, settings, package_data.prefix)
 
-			if settings.application is not None:
-				for key, value in settings.application:
-					app_key = 'APPLICATION_{}'.format(key.upper())
-					environment.add(app_key, value, package_data.variablesPrefix)
+			if package_data.dependencies is not None:
+				for dependency in package_data.dependencies:
+					environment.add_port(dependency, settings, package_data.prefix)
+					dependency_data = getattr(settings.application.packages, dependency)
+					if dependency_data.available is None or dependency_data.available:
+						build_action(dependency, package_data.type, package_name)
 
-			if settings.profile is not None:
-				for profile_type, global_data in settings.profile:
+			for key, value in settings.application.metadata:
+				app_key = 'APPLICATION_{}'.format(key.upper())
+				environment.add(app_key, value, package_data.prefix)
+
+			if settings.application.variables is not None:
+				for key, value in settings.application.variables:
+					environment.add(key, value, package_data.prefix)
+
+			if package_data.variables is not None:
+				for key, value in package_data.variables:
+					environment.add(key, value, package_data.prefix)
+
+			if settings.application.profiles is not None:
+				for profile_type, global_data in settings.application.profiles:
 					def filter_fn(choice):
 						pattern = re.compile('^{}:[\w\-\d]+$'.format(profile_type, 'g'))
 						return re.search(pattern, choice)
@@ -50,7 +64,7 @@ def build(settings, args):
 
 					if 'variables' in global_data and chosen_profile in global_data.variables:
 						for key, value in getattr(global_data.variables, chosen_profile):
-							environment.add(key, value, package_data.variablesPrefix)
+							environment.add(key, value, package_data.prefix)
 
 					if 'profile' in package_data \
 						and profile_type in package_data.profile \
@@ -58,17 +72,7 @@ def build(settings, args):
 
 						values = getattr(package_data.profile, profile_type)
 						for key, value in getattr(values, chosen_profile):
-							environment.add(key, value, package_data.variablesPrefix)
-			
-			for dependency in package_data.dependencies:
-				environment.add_port(dependency, settings, package_data.variablesPrefix)
-				dependency_data = getattr(settings.package, dependency)
-				if dependency_data.available is None or dependency_data.available:
-					build_action(dependency, package_data.type, package_name)
-
-			if package_data.variables is not None:
-				for key, value in package_data.variables:
-					environment.add(key, value, package_data.variablesPrefix)
+							environment.add(key, value, package_data.prefix)
 
 			if package_data.available is None or package_data.available:
 				build_action(package_name, package_data.type, package_name)

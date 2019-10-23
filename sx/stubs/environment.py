@@ -14,7 +14,7 @@ class Environment(object):
 
 	def add_port(self, name, settings, prefix=None):
 		port_key = '{}_PORT'.format(name.upper())
-		port_value = getattr(settings.package, name).port
+		port_value = getattr(settings.application.packages, name).port
 
 		if prefix is not None:
 			port_key = '{}{}'.format(prefix, port_key)

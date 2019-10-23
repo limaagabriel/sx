@@ -1,4 +1,4 @@
-import toml
+import yaml
 import json
 
 
@@ -29,8 +29,9 @@ class Settings(object):
 		if type(settings) is not str:
 			self.__settings = settings
 			return
-
-		self.__settings = toml.load(settings)
+		
+		with open(settings) as stream:
+			self.__settings = yaml.safe_load(stream)
 
 	def __getattr__(self, name):
 		if name not in self.__settings:
