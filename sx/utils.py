@@ -11,6 +11,7 @@ from subprocess import PIPE
 from functools import reduce
 from coolname import generate_slug
 from sx.stubs.process_log import ProcessLog
+from concurrent.futures import ThreadPoolExecutor
 
 
 def get_package_root(name):
@@ -175,13 +176,18 @@ def create_session(packages, for_development):
 
     for package_name, package_settings in sort(packages):
         run(session, package_name, package_settings, for_development)
+        time.sleep(1)
     session.list_windows()[0].kill_window()
     return session, session_name
 
 def close_session(session):
-    for window in session.list_windows():
-        for _ in range(2):
-            window.attached_pane.send_keys('kill -SIGINT $PID')
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        def kill_service(window):
+            for _ in range(2):
+                window.attached_pane.send_keys('kill -SIGINT $PID')
+                time.sleep(1)
+
+        executor.map(kill_service, session.list_windows())
 
     try:
         for window in session.list_windows():
