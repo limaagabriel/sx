@@ -37,7 +37,7 @@ def export_service(name, service_name, target, user, data, dependencies, path):
         if 'niceness' in data:
             stream.write('Nice = {}\n'.format(data.niceness))
         stream.write('ExecStartPre = /bin/sleep 2\n')
-        stream.write('Environment = START_METHOD=SYSTEMD')
+        stream.write('Environment =START_METHOD=SYSTEMD\n')
         stream.write('ExecStart = {}\n'.format(get_command(data)))
         stream.write('WorkingDirectory = {}\n\n'.format(os.path.abspath(get_package_root(name))))
         
