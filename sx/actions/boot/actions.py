@@ -30,7 +30,7 @@ def build(settings, args):
 				for dependency in package_data.dependencies:
 					environment.add_port(dependency, settings, package_data.prefix)
 					dependency_data = getattr(settings.application.packages, dependency)
-					if dependency_data.available is None or dependency_data.available:
+					if dependency_data.available is None or dependency_data.available and not args.env_only:
 						build_action(dependency, package_data.type, package_name)
 
 			for key, value in settings.application.metadata:
@@ -48,7 +48,7 @@ def build(settings, args):
 			if settings.application.profiles is not None:
 				for profile_type, global_data in settings.application.profiles:
 					def filter_fn(choice):
-						pattern = re.compile('^{}:[\w\-\d]+$'.format(profile_type, 'g'))
+						pattern = re.compile(r'^{}:[\w\-\d]+$'.format(profile_type), 'g')
 						return re.search(pattern, choice)
 
 					chosen_profile = global_data.default
@@ -74,15 +74,13 @@ def build(settings, args):
 						for key, value in getattr(values, chosen_profile):
 							environment.add(key, value, package_data.prefix)
 
-			if package_data.available is None or package_data.available:
+			if package_data.available is None or package_data.available and not args.env_only:
 				build_action(package_name, package_data.type, package_name)
-		if package_data.postBuild is not None:
+		if package_data.postBuild is not None and not args.skip_post:
 			execute_command(package_name, 'postBuild', package_data)
 
 
 def start(settings, args):
-	processes = []
-
 	print('Booting selected packages')
 	selected_packages = select_packages(settings, args.packages)
 	session, name = create_session(selected_packages, args.develop)

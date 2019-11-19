@@ -26,6 +26,7 @@ setuptools.setup(
         'sx.actions',
         'sx.actions.boot',
         'sx.actions.create',
+        'sx.actions.export',
         'sx.helpers'
     ],
     install_requires=[
