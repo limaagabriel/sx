@@ -94,6 +94,8 @@ def run(session, name, settings, for_development):
 
     commands = [
         'cd {}'.format(working_dir),
+        'RUNTIME=sx',
+        'RUNTIME_ID={}'.format(name),
         '{} &'.format(command),
         'PID=$!'
     ]
@@ -113,12 +115,6 @@ def run_process(name, settings):
     process = subprocess.Popen(command, stdout=PIPE, stderr=PIPE, cwd=working_dir)
     print('Running package {}@{}'.format(name, process.pid))
     
-    if 'niceness' in settings:
-        args = [settings.niceness, process.pid]
-        command = 'renice -n {} -p {}'.format(*args)
-        subprocess.run(command.split(' '))
-        print('Adjusting niceness of {} to {}'.format(name, settings.niceness))
-
     return ProcessLog(name, process, log_body)
 
 def execute_command(package_name, command_name, data):

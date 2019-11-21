@@ -15,34 +15,35 @@ def get_command(data):
 def export_target(name, services, path):
     with open(os.path.join(path, name), 'w') as stream:
         stream.write('[Unit]\n')
-        stream.write('After = network.target\n')
-        stream.write('Wants = {}\n\n'.format(' '.join(services)))
+        stream.write('After=network.target\n')
+        stream.write('Wants={}\n\n'.format(' '.join(services)))
         
         stream.write('[Install]\n')
-        stream.write('WantedBy = multi-user.target\n')
+        stream.write('WantedBy=multi-user.target\n')
 
 
 def export_service(name, service_name, target, user, data, dependencies, path):
     with open(os.path.join(path, service_name), 'w') as stream:
         stream.write('[Unit]\n')
         if len(dependencies) == 0:
-            stream.write('After = network.target\n')
+            stream.write('After=network.target\n')
         else:
-            stream.write('After = {}\n'.format(' '.join(dependencies)))
-        stream.write('PartOf = {}\n'.format(target))
-        stream.write('Description = {}\n\n'.format(data.description))
+            stream.write('After={}\n'.format(' '.join(dependencies)))
+        stream.write('PartOf={}\n'.format(target))
+        stream.write('Description={}\n\n'.format(data.description))
 
         stream.write('[Service]\n')
-        stream.write('User = {}\n'.format(user))
+        stream.write('User={}\n'.format(user))
         if 'niceness' in data:
-            stream.write('Nice = {}\n'.format(data.niceness))
-        stream.write('ExecStartPre = /bin/sleep 2\n')
-        stream.write('Environment =START_METHOD=SYSTEMD\n')
-        stream.write('ExecStart = {}\n'.format(get_command(data)))
-        stream.write('WorkingDirectory = {}\n\n'.format(os.path.abspath(get_package_root(name))))
+            stream.write('Nice={}\n'.format(data.niceness))
+        stream.write('ExecStartPre=/bin/sleep 2\n')
+        stream.write('Environment="RUNTIME=systemd"\n')
+        stream.write('Environment="RUNTIME_ID={}"\n'.format(target))
+        stream.write('ExecStart={}\n'.format(get_command(data)))
+        stream.write('WorkingDirectory={}\n\n'.format(os.path.abspath(get_package_root(name))))
         
         stream.write('[Install]\n')
-        stream.write('WantedBy = {}\n'.format(target))
+        stream.write('WantedBy={}\n'.format(target))
 
 
 def export(settings, args):
