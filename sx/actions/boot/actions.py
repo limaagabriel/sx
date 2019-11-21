@@ -1,6 +1,7 @@
 import re
 import sys
 import time
+import signal
 
 from sx.utils import sort
 from sx.utils import install
@@ -85,15 +86,19 @@ def start(settings, args):
 	selected_packages = select_packages(settings, args.packages)
 	session, name = create_session(selected_packages, args.develop)
 
-	try:
-		print('Session name: {}'.format(name))
-		print('Press Ctrl+C to stop')
-		
-		while True:
-			time.sleep(86400)
-	except KeyboardInterrupt:
+	print('Session name: {}'.format(name))
+	print('Press Ctrl+C to stop')
+
+	def exit_fn(signum, frame):
 		print('Requesting services to stop')
-		
 		if close_session(session):
 			print('Exited successfully!')
+			sys.exit(0)
+		sys.exit(1)
 
+	signal.signal(signal.SIGINT, exit_fn)
+	signal.signal(signal.SIGTERM, exit_fn)
+		
+	while True:
+		time.sleep(86400)
+	
