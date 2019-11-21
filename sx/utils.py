@@ -179,8 +179,8 @@ def create_session(packages, for_development):
 def close_session(session):
     with ThreadPoolExecutor(max_workers=10) as executor:
         def kill_service(window):
-            for _ in range(2):
-                window.attached_pane.send_keys('kill -SIGINT $PID')
+            for _ in range(3):
+                window.attached_pane.send_keys('kill -SIGTERM $PID')
                 time.sleep(1)
 
         executor.map(kill_service, session.list_windows())
