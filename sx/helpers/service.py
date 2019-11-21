@@ -1,6 +1,8 @@
 import os
+import sys
 import grpc
 import time
+import signal
 import importlib
 from functools import wraps
 from concurrent import futures
@@ -34,26 +36,29 @@ class ServiceManager(object):
 
 	@staticmethod
 	def boot_server(name, service, max_workers=10, on_exit=None):
-		try:
-			port = os.environ.get('{}_PORT'.format(name.upper()))
-			server = grpc.server(futures.ThreadPoolExecutor(max_workers=max_workers))
-			server.add_insecure_port('[::]:{}'.format(port))
+		port = os.environ.get('{}_PORT'.format(name.upper()))
+		server = grpc.server(futures.ThreadPoolExecutor(max_workers=max_workers))
+		server.add_insecure_port('[::]:{}'.format(port))
 		
 			
-			add_base = 'add_{}Servicer_to_server'
-			service_controller = ServiceManager.__ServiceInstance(name, port)
-			add_method = getattr(service_controller.services, add_base.format(name.capitalize()))
+		add_base = 'add_{}Servicer_to_server'
+		service_controller = ServiceManager.__ServiceInstance(name, port)
+		add_method = getattr(service_controller.services, add_base.format(name.capitalize()))
 
-			add_method(service, server)
-			server.start()
+		add_method(service, server)
+		server.start()
 
-			while True:
-				time.sleep(86400)
-		except KeyboardInterrupt:
+		def exit_handler(signum, frame):
 			server.stop(0)
-
 			if on_exit is not None:
 				on_exit()
+			sys.exit()
+
+		signal.signal(signal.SIGINT, exit_handler)
+		signal.signal(signal.SIGTERM, exit_handler)
+
+		while True:
+			time.sleep(86400)
 
 	@staticmethod
 	def get(name):
