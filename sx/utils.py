@@ -94,8 +94,8 @@ def run(session, name, settings, for_development):
 
     commands = [
         'cd {}'.format(working_dir),
-        'RUNTIME=sx',
-        'RUNTIME_ID={}'.format(name),
+        'export RUNTIME=sx',
+        'export RUNTIME_ID={}'.format(name),
         '{} &'.format(command),
         'PID=$!'
     ]

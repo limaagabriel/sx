@@ -33,7 +33,6 @@ def export_service(name, service_name, target, user, data, dependencies, path):
         stream.write('Description={}\n\n'.format(data.description))
 
         stream.write('[Service]\n')
-        stream.write('User={}\n'.format(user))
         if 'niceness' in data:
             stream.write('Nice={}\n'.format(data.niceness))
         stream.write('ExecStartPre=/bin/sleep 2\n')

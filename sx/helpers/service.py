@@ -52,7 +52,7 @@ class ServiceManager(object):
 			server.stop(0)
 			if on_exit is not None:
 				on_exit()
-			sys.exit()
+			os.kill(os.getpid(), signal.SIGKILL)
 
 		signal.signal(signal.SIGINT, exit_handler)
 		signal.signal(signal.SIGTERM, exit_handler)
