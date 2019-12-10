@@ -49,7 +49,8 @@ def build(settings, args):
 			if settings.application.profiles is not None:
 				for profile_type, global_data in settings.application.profiles:
 					def filter_fn(choice):
-						pattern = re.compile(r'^{}:[\w\-\d]+$'.format(profile_type), 'g')
+						pattern_str = r'^{}:[\w\-\d]+$'.format(profile_type)
+						pattern = re.compile(pattern_str)
 						return re.search(pattern, choice)
 
 					chosen_profile = global_data.default
