@@ -35,6 +35,9 @@ def export_service(name, service_name, target, user, data, dependencies, path):
         stream.write('[Service]\n')
         if 'niceness' in data:
             stream.write('Nice={}\n'.format(data.niceness))
+        if 'restart' in data:
+            stream.write('Restart={}\n'.format(data.restart))
+            stream.write('RestartSec=10\n')
         stream.write('ExecStartPre=/bin/sleep 2\n')
         stream.write('Environment="RUNTIME=systemd"\n')
         stream.write('Environment="RUNTIME_ID={}"\n'.format(target))
