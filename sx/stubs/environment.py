@@ -1,25 +1,32 @@
 import os
 from sx.utils import get_package_root
+from sx.stubs.settings import Settings
 
 
 class Environment(object):
-	def __init__(self, location):
+	def __init__(self, location, constants={}):
 		self.__location = location
+		self.__constants = constants
 		self.__data = {}
 
-	def add(self, key, value, prefix=None):
+	def __add(self, key, value, prefix):
 		if prefix is not None:
 			key = '{}{}'.format(prefix, key)
 		self.__data[key] = value
 
+	def add(self, key, value, prefix=None):
+		if type(value) == Settings:
+			if 'key' in value and value.key in self.__constants:
+				self.__add(key, self.__constants[value.key], prefix)
+			elif 'default' in value:
+				self.__add(key, value.default, prefix)
+		else:
+			self.__add(key, value, prefix)
+
 	def add_port(self, name, settings, prefix=None):
 		port_key = '{}_PORT'.format(name.upper())
 		port_value = getattr(settings.application.packages, name).port
-
-		if prefix is not None:
-			port_key = '{}{}'.format(prefix, port_key)
-
-		self.add(port_key, port_value)
+		self.add(port_key, port_value, prefix)
 
 	def __enter__(self):
 		self.__data = {}

@@ -24,6 +24,10 @@ build_command.add_argument('-s', '--skip-post', action='store_true',
 							help='Skips post build steps', default=False)
 build_command.add_argument('-e', '--env-only', action='store_true',
 							help='Compiles only .env files', default=False)
+build_command.add_argument('-d', '--define', action='append', nargs=2, default=[],
+							metavar=('key', 'value'), help='Sets a configuration constant manually.')
+build_command.add_argument('-c', '--configure', default=None,
+							help='Defines a preset configuration file to use.')
 
 
 start_command = boot_action_parsers.add_parser('start', help='Run packages')

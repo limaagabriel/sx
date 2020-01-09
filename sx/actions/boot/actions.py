@@ -1,6 +1,8 @@
+import os
 import re
 import sys
 import time
+import yaml
 import signal
 
 from sx.utils import sort
@@ -14,8 +16,37 @@ from sx.utils import clean_build_location
 from sx.stubs.environment import Environment
 
 
+def to_plain(d, prefix = '', result={}):
+	for k, v in d.items():
+		if type(v) == type(dict()):
+			to_plain(v, prefix + str(k) + '.', result)
+		else:
+			result[prefix + str(k)] = str(v)
+	return result
+
+def select_constants(args):
+	constants = {}
+	
+	if args.configure is not None:
+		root = os.path.join('manifests', 'configuration')
+		name = '{}.yml'.format(args.configure)
+		configure = os.path.join(root, name)
+
+		if not os.path.exists(configure):
+			raise Exception('Preset file not found.')
+		
+		with open(configure, 'r') as stream:
+			confs = yaml.safe_load(stream)
+			constants = { **to_plain(confs) }
+
+	for key, value in args.define:
+		constants[key] = value
+	return constants
+
+
 def build(settings, args):
 	buildable_types = ['python']
+	constants = select_constants(args)
 	selected_packages = select_packages(settings, args.packages)
 
 	for package_name, package_data in sort(selected_packages):
@@ -24,7 +55,7 @@ def build(settings, args):
 		if package_data.type in buildable_types:
 			build_action = install
 
-		with Environment(package_name) as environment:
+		with Environment(package_name, constants) as environment:
 			environment.add_port(package_name, settings, package_data.prefix)
 
 			if package_data.dependencies is not None:
