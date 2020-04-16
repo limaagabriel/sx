@@ -109,8 +109,12 @@ def build(settings, args):
 
 			if package_data.available is None or package_data.available and not args.env_only:
 				build_action(package_name, package_data.type, package_name)
-		if package_data.postBuild is not None and not args.skip_post:
-			execute_command(package_name, 'postBuild', package_data)
+		if package_data.postBuild is not None:
+			if package_data.postBuild.commands is not None and not args.skip_post:
+				env = {}
+				if package_data.postBuild.variables is not None:
+					env = package_data.postBuild.variables.dict()
+				execute_command(package_name, 'postBuild', package_data, env)
 
 
 def start(settings, args):

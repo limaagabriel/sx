@@ -117,17 +117,18 @@ def run_process(name, settings):
     
     return ProcessLog(name, process, log_body)
 
-def execute_command(package_name, command_name, data):
-    commands = getattr(data, command_name)
+def execute_command(package_name, command_name, data, env):
+    commands = getattr(data, command_name).commands
     if type(commands) == str:
         commands = [ commands ]
 
     for idx, command in enumerate(commands):
+        env = { **os.environ, **env }
         command = compile_command(command, data)
         working_dir = get_package_root(package_name)
         message = [command_name, idx, package_name, command]
         print('Executing {} ({}) for package "{}": {}'.format(*message))
-        subprocess.run(command.split(' '), stdout=PIPE, stderr=PIPE, cwd=working_dir)
+        subprocess.run(command.split(' '), stdout=PIPE, stderr=PIPE, cwd=working_dir, env=env)
 
 
 def sort(packages):

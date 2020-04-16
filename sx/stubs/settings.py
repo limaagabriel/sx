@@ -54,3 +54,6 @@ class Settings(object):
 
 	def __len__(self):
 		return len(self.__settings)
+
+	def dict(self):
+		return { **self.__settings }
