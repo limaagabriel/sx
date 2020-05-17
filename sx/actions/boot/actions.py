@@ -28,16 +28,17 @@ def select_constants(args):
 	constants = {}
 	
 	if args.configure is not None:
-		root = os.path.join('manifests', 'configuration')
-		name = '{}.yml'.format(args.configure)
-		configure = os.path.join(root, name)
+		for conf in args.configure:
+			root = os.path.join('manifests', 'configuration')
+			name = '{}.yml'.format(conf)
+			configure = os.path.join(root, name)
 
-		if not os.path.exists(configure):
-			raise Exception('Preset file not found.')
+			if not os.path.exists(configure):
+				raise Exception('Preset file not found.')
 		
-		with open(configure, 'r') as stream:
-			confs = yaml.safe_load(stream)
-			constants = { **to_plain(confs) }
+			with open(configure, 'r') as stream:
+				confs = yaml.safe_load(stream)
+				constants = { **constants, **to_plain(confs) }
 
 	for key, value in args.define:
 		constants[key] = value
